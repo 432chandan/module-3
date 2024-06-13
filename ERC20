@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+
+contract SilverToken is ERC20, ERC20Burnable, Ownable {
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint256 initialSupply,
+        address initialOwner
+    ) ERC20(tokenName, tokenSymbol) Ownable(initialOwner) {
+        _mint(msg.sender, initialSupply);
+    }
+
+    function mintTokens(address recipient, uint256 amount) external onlyOwner {
+        require(recipient != address(0), "Mint: recipient is the zero address");
+        require(amount > 0, "Mint: amount must be greater than zero");
+        _mint(recipient, amount);
+    }
+
+    function burnTokens(uint256 amount) external {
+        require(amount > 0, "Burn: amount must be greater than zero");
+        _burn(msg.sender, amount);
+    }
+
+    function increaseTotalSupply(uint256 additionalSupply) external onlyOwner {
+        require(additionalSupply > 0, "Increase Supply: additional supply must be greater than zero");
+        _mint(owner(), additionalSupply);
+    }
+
+    function transferTokens(address recipient, uint256 amount) public virtual returns (bool) {
+        require(recipient != address(0), "Transfer: recipient is the zero address");
+        require(amount > 0, "Transfer: amount must be greater than zero");
+        _transfer(_msgSender(), recipient, amount);
+        return true;
+    }
+}
